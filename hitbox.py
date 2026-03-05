@@ -21,7 +21,7 @@ class Hitbox:
         self.height = height
         self.depth  = depth
         self.offset = np.array(offset, dtype=float)
-        self.debug = False
+        self.debug = True
 
     # =========================================================
     # BOUNDS
