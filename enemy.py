@@ -59,6 +59,9 @@ class Enemy:
         self.reached_end    = False   # ถึง base แล้ว
 
         self.lane           = lane    # row ของ grid (0-4) คำนวณจาก Z
+        # offset Z เล็กน้อยเพื่อกัน depth เท่ากันพอดีตอน sort
+        import random
+        self._depth_offset  = random.uniform(-0.3, 0.3)
         self.distance_walked = 0.0   # ระยะทางที่เดินมาแล้ว
         self.stopped        = False   # หยุดเพราะเจอ tower
 
@@ -66,7 +69,14 @@ class Enemy:
         self._image = None
         if image_path:
             try:
-                self._image = pg.image.load(image_path).convert_alpha()
+                img = pg.image.load(image_path)
+                # ถ้าเป็น jpg ไม่มี alpha — set colorkey สีขาวออก
+                if image_path.lower().endswith(('.jpg', '.jpeg')):
+                    img = img.convert()
+                    img.set_colorkey((255, 255, 255))
+                else:
+                    img = img.convert_alpha()
+                self._image = img
             except Exception as e:
                 print(f"[Enemy] ไม่พบรูป {image_path}: {e}")
 
@@ -189,7 +199,7 @@ class Enemy:
         world_pos = np.array([*self.position, 1.0])
         cam_pos   = world_pos @ self.render.camera.camera_matrix()
 
-        if cam_pos[2] < 0.3:   # อยู่หลังกล้อง
+        if cam_pos[2] < 2.0:   # ใกล้กล้องเกินไป — ข้าม
             return
 
         # project ลงหน้าจอ
@@ -208,7 +218,7 @@ class Enemy:
         surf = self._make_sprite(w, h)
 
         self.render.polygon_pool.append({
-            'depth':     cam_pos[2],
+            'depth':     cam_pos[2] + self._depth_offset,
             'billboard': {
                 'surf': surf,
                 'sx': sx, 'sy': sy,
@@ -226,7 +236,11 @@ class Enemy:
 
     def _make_sprite(self, w, h):
         if self._image:
-            return pg.transform.scale(self._image, (w, h))
+            # cache — scale ใหม่เฉพาะตอนขนาดเปลี่ยน
+            if not hasattr(self, '_cached_surf') or self._cached_size != (w, h):
+                self._cached_surf = pg.transform.scale(self._image, (w, h))
+                self._cached_size = (w, h)
+            return self._cached_surf
 
         # placeholder — สี่เหลี่ยมสีแดงเข้ม + outline
         surf = pg.Surface((w, h), pg.SRCALPHA)

@@ -61,14 +61,14 @@ class Tower:
             if e.alive
             and not e.reached_end
             and e.lane == self.row
-            and e.position[0] > self.position[0]
+            and e.position[0] < self.position[0]
         ]
         if not alive_enemies:
             return
 
         target = max(alive_enemies, key=lambda e: e.distance_walked)
         target.take_damage(self.damage)
-
+        print(f'shoot {target.hp}')
     def take_damage(self, amount):
         if not self.alive:
             return

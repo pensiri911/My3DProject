@@ -47,7 +47,7 @@ class SoftwareRender:
             ]
         for i in range(len(self.placement_grid)):
             for j in range(len(self.placement_grid[i])):
-                self.placement_grid[i][j] = Tower(self,filepath='resource/Turret.obj', col=j, row=i,damage=30)
+                self.placement_grid[i][j] = Tower(self,filepath='resource/Turret.obj', col=j, row=i,damage=1)
         self.walls      = []
         self.grounds    = []
         self.billboards = []
@@ -87,7 +87,7 @@ class SoftwareRender:
             for j in range(15):
                 self.enemies[i].append(
                     Enemy(self, position=[SPAWN_POSITION[0], 0, 0], waypoints=[[BASE_POSITION[0], 0, 0]],
-                hp=100, walk_speed=0.04, damage=8, reward=20
+                hp=100, walk_speed=0.02 + j/1000, damage=1, reward=20
                 ,image_path="image/boss.png",width=6,height=6,lane=i)
                 )
                 
