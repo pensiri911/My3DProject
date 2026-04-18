@@ -105,7 +105,8 @@ class WaveManager:
             })
 
     def _spawn(self, entry):
-        if entry['type'].startswith('boss_'):
+        from entities.boss import get_boss_data
+        if entry['type'] in get_boss_data():
             from entities.boss import Boss
             boss = Boss(self.render, entry['type'])
             getattr(self.render, 'bosses', []).append(boss)
